@@ -88,9 +88,13 @@ router.get('/kanye', function(req, res) {
     })
   }
   getData(function() {
-    var query = "MATCH (s:Song) WHERE 'Kanye West' IN s.artist_names CREATE (KanyeWest:Artist {id: '5K4W6rqBFWDnAN6FQUkS6x', name: 'Kanye West'}) CREATE (KanyeWest)-[:PERFORMED]->(s)";
-    db.query(query, {}, function(err, results) {});
-    console.log('kanye created');
+    var query = "CREATE (KanyeWest:Artist {id: '5K4W6rqBFWDnAN6FQUkS6x', name: 'Kanye West'})";
+    db.query(query, {}, function(err, results) {
+      var query2 = "MATCH (s:Song),(a:Artist) WHERE 'Kanye West' IN s.artist_names AND a.name = 'Kanye West' CREATE (a)-[:PERFORMED]->(s)";
+      db.query(query2, {}, function(err, results) {
+
+      });
+    });
   });
 })
 
@@ -105,6 +109,8 @@ module.exports = router;
 // MATCH (n) OPTIONAL MATCH (n)-[r]->() DELETE n,r
 
 // MATCH (s:Song),(a:Artist) WHERE "Kanye West" IN s.artist_names AND a.name = "Kanye West" CREATE (a)-[:PERFORMED]->(s)
+
+// MATCH (a:Artist)-[:PERFORMED]->(s:Song) WHERE a.name = 'Kanye West' RETURN a,s
 
 
 
