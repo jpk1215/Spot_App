@@ -74,7 +74,6 @@ router.get('/kanye', function(req, res) {
             async.map(albumTracksArray.items,function(track,complete) {
               var query = "MATCH (s:Song {id:'"+track.id+"'}) RETURN s";
               db.query(query, {}, function(err, results) {
-                console.log(results.length)
                 if(results.length === 0) {
                   complete(null,track);
                 } else {
@@ -88,13 +87,17 @@ router.get('/kanye', function(req, res) {
                   db.query(query, {}, function(err, results) {});
                 }
               })
-            complete(null,{});
+            complete(null);
           },function (err) {
+              console.log("("+(offset+50)+" < "+albumsObject.total+"):"+((offset+50) < albumsObject.total));
               if (albumsObject.total > 50 && (offset+50) < albumsObject.total) {
-                console.log(albumsObject.total,offset);
+                console.log("just grabbed albums: "+(offset+1)+"-"+(offset+50))
+                console.log("the offset is: "+ offset);
                 offset += 50;
+                console.log("going to get: "+(offset+1)+"-"+(offset+50))
                 getData(artistId,makeRelations);
               } else {
+                console.log("you have reached the else statement")
                   console.log(artistObj);
                   offset = 0;
                   artistObj = {};
@@ -104,13 +107,12 @@ router.get('/kanye', function(req, res) {
         })
       })
     }
-
-  getData('3nFkdlSjzX9mRTtwJOzDYB',function(id) {
-    var query = "CREATE (JAYZ:Artist {id: '"+id+"', name: 'JAY Z', processed: 'true'})";
+  getData('0fA0VVWsXO9YnASrzqfmYu',function(id) {
+    var query = "CREATE (KidCudi:Artist {id: '"+id+"', name: 'Kid Cudi', processed: 'true'})";
     db.query(query, {}, function(err, results) {
-      var query2 = "MATCH (s:Song),(a:Artist) WHERE 'JAY Z' IN s.artist_names AND a.name = 'JAY Z' CREATE (a)-[:PERFORMED]->(s)";
+      var query2 = "MATCH (s:Song),(a:Artist) WHERE 'Kid Cudi' IN s.artist_names AND a.name = 'Kid Cudi' CREATE (a)-[:PERFORMED]->(s)";
       db.query(query2, {}, function(err, results) {
-        console.log('done');
+        console.log('STOP THE SERVER!!!');
       });
     });
   });
@@ -129,6 +131,16 @@ module.exports = router;
 // MATCH (s:Song),(a:Artist) WHERE "Kanye West" IN s.artist_names AND a.name = "Kanye West" CREATE (a)-[:PERFORMED]->(s)
 
 // MATCH (a:Artist)-[:PERFORMED]->(s:Song) WHERE a.name = 'Kanye West' RETURN a,s
+
+// Kanye West, 5K4W6rqBFWDnAN6FQUkS6x
+// JAY Z, 3nFkdlSjzX9mRTtwJOzDYB
+// Ludacris, 3ipn9JLAPI5GUEo4y4jcoi
+// OutKast, 1G9G7WwrXka3Z1r7aIDjI7
+// Common, 2GHclqNVjqGuiE5mA7BEoc
+// Daft Punk, 4tZwfgrHOc3mvqYlEYSvVi
+// Lil Wayne, 55Aa2cqylxrFIXC767Z865
+// Tyler, The Creator, 4V8LLVI7PbaPR0K2TGSxFF
+// Kid Cudi, 0fA0VVWsXO9YnASrzqfmYu
 
 
 
