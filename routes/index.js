@@ -31,6 +31,8 @@ function cleanAlbumData(arr) {
   return outputArr;
 }
 
+var artistObj = {};
+
 function cleanTrackData(arr) {
   var outputArr = [];
   for (var i = 0; i < arr.length; i++) {
@@ -41,11 +43,13 @@ function cleanTrackData(arr) {
       arr[i].artist_ids = [];
       for (var j = 0; j < arr[i].artists.length; j++) {
         arr[i].artist_names.push(arr[i].artists[j].name);
-        arr[i].artist_ids.push(arr[i].artists[j].id)
+        arr[i].artist_ids.push(arr[i].artists[j].id);
+        artistObj[arr[i].artists[0].name] = artistObj[arr[i].artists[0].name] || arr[i].artists[0].id;
       }
     } else {
       arr[i].artist_names = arr[i].artists[0].name;
       arr[i].artist_ids = arr[i].artists[0].id;
+      artistObj[arr[i].artists[0].name] = artistObj[arr[i].artists[0].name] || arr[i].artists[0].id;
     }
     delete arr[i].artists;
     outputArr.push(arr[i]);
@@ -56,9 +60,8 @@ function cleanTrackData(arr) {
 
 router.get('/kanye', function(req, res) {
   var offset = 0;
-  // album_type=single,album
-  var getData = function(func) {
-    request.get({json:true,url:'https://api.spotify.com/v1/artists/5K4W6rqBFWDnAN6FQUkS6x/albums?&market=US&limit=50&offset='+offset}, function (error, response, body) {
+  var getData = function(artistId,makeRelations) {
+    request.get({json:true,url:'https://api.spotify.com/v1/artists/'+artistId+'/albums?&market=US&limit=50&offset='+offset}, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var albumsArr = cleanAlbumData(body.items);
         async.map(albumsArr, function(item,complete) {
@@ -69,30 +72,30 @@ router.get('/kanye', function(req, res) {
           });
         },function(err,arrayOfAlbumTracks) {
           for (var i = 0; i < arrayOfAlbumTracks.length; i++) {
-          var albumTracks = cleanTrackData(arrayOfAlbumTracks[i].items)
+          var albumTracks = cleanTrackData(arrayOfAlbumTracks[i].items);
             for (var j = 0; j < albumTracks.length; j++) {
-              var query = "CREATE ("+albumTracks[j].name.replace(/\s+/g, '')+":Song "+JSON.stringify(albumTracks[j]).replace(/"(\w*)":/g, "$1:")+")";
-              db.query(query, {}, function(err, results) {});
+                  var query = "CREATE ("+albumTracks[j].name.replace(/\s+/g, '')+":Song "+JSON.stringify(albumTracks[j]).replace(/"(\w*)":/g, "$1:")+")";
+                  db.query(query, {}, function(err, results) {});
             };
           }
           if (body.total > 50 && (offset+50) < body.total) {
             console.log(body.total,offset);
             offset += 50;
-            getData(func);
+            getData(artistId,makeRelations);
           } else {
-            console.log("I'm done");
-            func();
+            offset = 0;
+            makeRelations(artistId);
           }
         })
       }
     })
   }
-  getData(function() {
-    var query = "CREATE (KanyeWest:Artist {id: '5K4W6rqBFWDnAN6FQUkS6x', name: 'Kanye West'})";
+  getData('5K4W6rqBFWDnAN6FQUkS6x',function(id) {
+    var query = "CREATE (KanyeWest:Artist {id: '"+id+"', name: 'Kanye West', processed: 'true'})";
     db.query(query, {}, function(err, results) {
       var query2 = "MATCH (s:Song),(a:Artist) WHERE 'Kanye West' IN s.artist_names AND a.name = 'Kanye West' CREATE (a)-[:PERFORMED]->(s)";
       db.query(query2, {}, function(err, results) {
-
+        console.log('done');
       });
     });
   });
