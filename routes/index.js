@@ -107,10 +107,10 @@ router.get('/kanye', function(req, res) {
         })
       })
     }
-  getData('0fA0VVWsXO9YnASrzqfmYu',function(id) {
-    var query = "CREATE (KidCudi:Artist {id: '"+id+"', name: 'Kid Cudi', processed: 'true'})";
+  getData('3TVXtAsR1Inumwj472S9r4',function(id) {
+    var query = "CREATE (Drake:Artist {id: '"+id+"', name: 'Drake', processed: 'true'})";
     db.query(query, {}, function(err, results) {
-      var query2 = "MATCH (s:Song),(a:Artist) WHERE 'Kid Cudi' IN s.artist_names AND a.name = 'Kid Cudi' CREATE (a)-[:PERFORMED]->(s)";
+      var query2 = "MATCH (s:Song),(a:Artist) WHERE 'Drake' IN s.artist_names AND a.name = 'Drake' CREATE (a)-[:PERFORMED]->(s)";
       db.query(query2, {}, function(err, results) {
         console.log('STOP THE SERVER!!!');
       });
@@ -132,6 +132,8 @@ module.exports = router;
 
 // MATCH (a:Artist)-[:PERFORMED]->(s:Song) WHERE a.name = 'Kanye West' RETURN a,s
 
+// Drake, 3TVXtAsR1Inumwj472S9r4
+// Wale, 67nwj3Y5sZQLl72VNUHEYE
 // Kanye West, 5K4W6rqBFWDnAN6FQUkS6x
 // JAY Z, 3nFkdlSjzX9mRTtwJOzDYB
 // Ludacris, 3ipn9JLAPI5GUEo4y4jcoi
@@ -141,6 +143,14 @@ module.exports = router;
 // Lil Wayne, 55Aa2cqylxrFIXC767Z865
 // Tyler, The Creator, 4V8LLVI7PbaPR0K2TGSxFF
 // Kid Cudi, 0fA0VVWsXO9YnASrzqfmYu
+// Kendrick Lamar, 2YZyLoL8N0Wb9xBt1NhZWg
+// Rihanna, 5pKCCKE2ajJHZ9KAiaK11H
+// Nas, 20qISvAhX20dpIbOOzGK3q
+// Schoolboy Q, 5IcR3N7QB1j6KBL8eImZ8m
+// J. Cole, 6l3HvQ5sa6mXTsMTB19rO5
+// Pusha T, 0ONHkAv9pCAFxb0zJwDNTy
+// A$AP Rocky, 13ubrt8QOOCPljQ2FL1Kca
+// Big Sean, 0c173mlxpT3dSFRgMO8XPh
 
 
 
